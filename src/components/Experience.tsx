@@ -14,8 +14,39 @@ import {
   MeshReflectorMaterial,
 } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
+import { useControls, button } from 'leva'
+import { Perf } from 'r3f-perf'
 
 export function Experience() {
+  const { perfVisible } = useControls({
+    perfVisible: false,
+  })
+
+  const { position, color, visible } = useControls('sphere', {
+    position: {
+      value: { x: -2, y: 0 },
+      step: 0.01,
+      joystick: 'invertY',
+    },
+    color: '#ff0000',
+    visible: true,
+    clickMe: button(() => {
+      console.log('Ok!')
+    }),
+    choice: {
+      options: ['a', 'b', 'c'],
+    },
+  })
+
+  const { scale } = useControls('cube', {
+    scale: {
+      value: 1.5,
+      step: 0.01,
+      min: 0,
+      max: 5,
+    },
+  })
+
   const cube = useRef<Mesh>(null!)
   const sphere = useRef<Mesh>(null!)
   const groupRef = useRef<Group>(null!)
@@ -38,6 +69,8 @@ export function Experience() {
 
   return (
     <>
+      {perfVisible ? <Perf position="top-left" /> : null}
+
       <OrbitControls makeDefault />
 
       <directionalLight position={[1, 2, 3]} intensity={1.5} />
@@ -45,9 +78,13 @@ export function Experience() {
 
       <group ref={groupRef}>
         <PivotControls anchor={[0, 0, 0]} depthTest={false} lineWidth={4}>
-          <mesh ref={sphere} position-x={-2}>
+          <mesh
+            ref={sphere}
+            position={[position.x, position.y, 0]}
+            visible={visible}
+          >
             <sphereGeometry />
-            <meshStandardMaterial color="orange" />
+            <meshStandardMaterial color={color} />
             <Html
               distanceFactor={8}
               occlude={[sphere, cube]}
@@ -64,7 +101,7 @@ export function Experience() {
           <mesh
             ref={cube}
             position-x={2}
-            scale={1.5}
+            scale={scale}
             rotation-y={Math.PI * 0.25}
           >
             <boxGeometry />
